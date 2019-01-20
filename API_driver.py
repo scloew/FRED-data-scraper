@@ -4,6 +4,9 @@
 ##How to handle the python 2.7 code?
         ## see -> https://stackoverflow.com/questions/27863832/calling-python-2-script-from-python-3
 
+#This project takes advantage of existing APIs found at
+#https://research.stlouisfed.org/docs/api/fred/
+
 from urllib.request import urlopen
 import operator
 import datetime
@@ -20,9 +23,6 @@ def writeMeta(l, fname): #collects and writes meta data
 
     mname=fname[:fname.rfind('.')]+'Meta.txt'
     print('writing to: ', mname)
-
-    APIs = {1 : FRBapi.searchTitle, 2 : fred_API.searchTitle,
-            3 : "#TODO", 4 : scratchAPI.search()}
 
     with open(mname, 'w') as file:
         file.write('Accessed ' + str(datetime.date.today())+'\n'+'\n'+'\n')
@@ -89,14 +89,24 @@ def mainLoop(): #main loop
 
     obs, more={}, True
     #if input('Feeling lucky? (Y/N): ').upper()=='Y':
-    #    obs, more=lucky(), False #TODO
+     #   obs, more=lucky(), False #TODO
 
 
+    APIs = {'1' : FRBapi.searchTitle, '2' : fred_API.searchTitle,
+             '3' : scratchAPI.searchTitle} #TODO add way to call python 27 api
 
-    feelingLucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
+
+    api_choice = None
+
+    while(api_choice not in APIs.keys()):
+        print("Select API")
+        print(" 1) FRB\n 2) FRED\n 3) scratch")
+        api_choice = input()
+
+    #feelingLucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
 
     while(more):
-        #obs.update(search()) #TODO
+        obs.update(APIs[api_choice]()) #TODO
         if input("Search Again(Y/N): ").upper() == 'N': #defaults to yes
             break
 
@@ -104,5 +114,4 @@ def mainLoop(): #main loop
     else: print('no data recorded -> good bye :)')
 
 if __name__=="__main__":
-    print("main file")
     mainLoop()

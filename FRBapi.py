@@ -2,6 +2,9 @@
 
 #does compatible dates work :: nan values recorded - should I check for nan's?
 
+#This project uses FRB api provided at
+#https://github.com/avelkoski/FRB
+
 from fred import Fred
 from urllib.request import urlopen
 import operator
@@ -73,25 +76,6 @@ def lucky(): #same concept as google's feeling lucky
 
     return obs
 
-def writeMeta(l, fname): #collects and writes meta data; same for all module
-
-    mname=fname[:fname.rfind('.')]+'Meta.txt'
-    print('writing to: ', mname)
-
-    with open(mname, 'w') as file:
-        file.write('Accessed ' + str(datetime.date.today())+'\n'+'\n'+'\n')
-        for ID in l:
-            key="&api_key=3b7e7d31bcc6d28556c82c290eb3572e&file_type=json"
-            url='https://api.stlouisfed.org/fred/series?series_id='+ID+key
-            response=urlopen(url)
-            content=response.read()
-            data=json.loads(content.decode('utf8'))
-            file.write(ID+'\n')
-            file.write(data['seriess'][0]['title']+'\n')
-            file.write(data['seriess'][0]['seasonal_adjustment']+ '\n'+ 'frequency: '+ data['seriess'][0]['frequency']+' units: '+ data['seriess'][0]['units']+'\n')
-            file.write('start: '+ data['seriess'][0]['observation_start']+ ' end:'+ data['seriess'][0]['observation_end']+'\n \n ---------------- \n ---------------- \n')
-        file.close()
-
 def collectDates(obs, op):
 
         dates=set(obs[list(obs.keys())[0]].keys()) #set of dates
@@ -100,41 +84,11 @@ def collectDates(obs, op):
             dates=op(dates,temp)
 
         dates=sorted(dates)
-        return dates   
-
-def printCSV(obs): #prints csv
-
-    print('Would you like to record for all dates (A) or all compatible dates (C)?')
-    if input().upper()=='C': op=operator.and_
-    else: op=operator.or_
-
-    fileName=input("Enter file name to write to: ")
-    with open(fileName, "w") as file:
-        wr=csv.writer(file)
-
-        keys=["dates"]
-        for k in obs.keys(): keys.append(k)
-        wr.writerow(keys) #successfully writes row of dates and id's
-
-        dates=collectDates(obs, op)
-        if dates==[] and op==operator.and_:
-                print("No compatible dates; recording all dates.")
-                dates=collectDates(obs, operator.or_)
-
-        for d in dates:
-            l=[d]
-            for k in range(1,len(keys)):
-                if d not in obs[keys[k]].keys():
-                    l.append('.')
-                else:
-                    l.append(obs[keys[k]][d])
-            wr.writerow(l)
-
-        if input('Would you like to record meta data?(Y/N): ').upper()=='Y':
-            writeMeta(list(obs.keys()), fileName)#defaults to no
-
+        return dates
 
 def FRBapi(): #main loop
+
+    print('running 1')
 
     obs, more={}, True
     if input('Feeling lucky? (Y/N): ').upper()=='Y':
