@@ -14,10 +14,15 @@ import datetime
 import json
 fr = Fred(api_key='3b7e7d31bcc6d28556c82c290eb3572e',response_type='dict')
 
-def searchTitle(*args): #finds series titles
+def printOptions
 
-    if not args: searchKey=input('Enter search key: ')
-    else: searchKey=args[0]
+def searchTitle(searchKey, lucky=False): #finds series titles @TODO refactor this; not single purpose (i.e use helpers)
+                                                              @TODO better naming skills
+
+    ##PRINT options
+    ##collect selections
+    ##collect observations
+    ##return observations
     params={'limit':50}
     res=fr.series.search(str(searchKey),params=params)
     if res==[]:
@@ -26,23 +31,23 @@ def searchTitle(*args): #finds series titles
     
     index=1
     l=['']
-    if not args: print('0: ALL')
+    if not lucky: print('0: ALL')
     for item in res:
         l.append((item['title'],item['id']))
-        if args: break
+        if lucky: break
         print(index,item['title'])
         index+=1
 
+
+
     return l #returns list of tuples (series title, series id)
 
-def getObs(l, *args): #takes list from searchTitle and gets obs
+def getObs(l, lucky=False): #takes list from searchTitle and gets obs #TODO implement lucky
 
-    if l == []: return {}
-    if not args:
-        sels=input('Enter selection: ')
-        sels=sels.split(' ')
-        if '0' in sels: sels=range(1,len(l))
-    else: sels=[1]
+    if l == []: return {} #TODO don't like safety check here; put in driver
+    sels=input('Enter selection: ')
+    sels=sels.split(' ')
+    if '0' in sels: sels=range(1,len(l))
     params = {
          'limit':10000,
          'output_type':1
@@ -62,19 +67,6 @@ def getObs(l, *args): #takes list from searchTitle and gets obs
             print('Invalid data selection: ', i)
 
     return obs #returns dict{'seriesID': {'date':value}}
-
-
-def lucky(): #same concept as google's feeling lucky
-
-    keys=input('Enter search keys: ').split(',')
-    idList=[]
-    obs={}
-
-    for key in keys:
-        try: obs.update(getObs(searchTitle(key),key))
-        except: print('Search error: ', key)
-
-    return obs
 
 def collectDates(obs, op):
 

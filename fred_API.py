@@ -36,13 +36,12 @@ def searchTitle(*args): #searches for items matching search key
         return l #returns list of tuples (series title, series id)
 
 
-def getObs(l, *args): #takes list from search and returns dict with observations
+def getObs(l, lucky=False): #takes list from search and returns dict with observations #TODO implement lucky
 
-    if not args:
-            sels=input('Enter selection: ')
-            sels=sels.split(' ')
-            if '0' in sels: sels=range(1,len(l))
-    else: sels=[1]
+    sels=input('Enter selection: ')
+    sels=sels.split(' ')
+    if '0' in sels: sels=range(1,len(l))
+    sels=[1]
 
     obs={} #dict{'seriesID': {'date':value}}
         
@@ -55,17 +54,6 @@ def getObs(l, *args): #takes list from search and returns dict with observations
 
     return obs #return dict{series ID, {date, value}}
 
-
-def lucky(): #works like google's feeling lucky
-        
-    keys=input('Enter search keys: ').split(', ')
-    idList, obs=[], {}
-
-    for key in keys:
-        try: obs.update(getObs(searchTitle(key),key))
-        except: print('Search error: ', key)
-
-    return obs
 
 
 def collectDates(obs, op):

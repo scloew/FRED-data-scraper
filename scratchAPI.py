@@ -82,6 +82,7 @@ def collectDates(obs, op):
 
 def lucky(): #essentially works same as google's feeling lucky
              #takes first result from search for each search key
+             #TODO Additional refactoring needed here?
     
     keys=input('Enter search keys: ').split(', ')
     print(keys)

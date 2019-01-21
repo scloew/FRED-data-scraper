@@ -88,13 +88,11 @@ def printCSV(obs): #prints csv
 def mainLoop(): #main loop
 
     obs, more={}, True
-    #if input('Feeling lucky? (Y/N): ').upper()=='Y':
-     #   obs, more=lucky(), False #TODO
-
 
     APIs = {'1' : FRBapi.searchTitle, '2' : fred_API.searchTitle,
              '3' : scratchAPI.searchTitle} #TODO add way to call python 27 api
-
+    #TODO change above dictionary so its value are the modules themselves
+    #TODO Each module will have get series method and get obs method
 
     api_choice = None
 
@@ -103,15 +101,17 @@ def mainLoop(): #main loop
         print(" 1) FRB\n 2) FRED\n 3) scratch")
         api_choice = input()
 
-    #feelingLucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
+    searchMethod = APIs[api_choice]
+    feelingLucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
 
     while(more):
-        obs.update(APIs[api_choice]()) #TODO
-        if input("Search Again(Y/N): ").upper() == 'N': #defaults to yes
-            break
+        titles = input("Enter search keys: ")
+        for t in titles:
+            obs.update(searchMethod(t, feelingLucky)) #TODO refactor search methods to return dictionary
+        more = (input("Search Again(Y/N): ").upper() == 'N') #defaults to yes
 
-    if obs!={}: printCSV(obs) #TODO
-    else: print('no data recorded -> good bye :)')
+    #if obs!={}: printCSV(obs) #TODO
+    #else: print('no data recorded -> good bye :)')
 
 if __name__=="__main__":
     mainLoop()
