@@ -1,6 +1,4 @@
 ##control module
-##How to specify which api to use in search -> each module has own search method,
-##that method is called by method that has API as arg
 ##How to handle the python 2.7 code?
         ## see -> https://stackoverflow.com/questions/27863832/calling-python-2-script-from-python-3
 
@@ -84,14 +82,22 @@ def printCSV(obs): #prints csv
             writeMeta(list(obs.keys()), fileName)#defaults to no
 
 
+def printSearchResults(searchRes):
+
+    index=1
+    for item in searchRes:
+        print(item[0])
+        index+=1
+        if index > 50:
+            break
+
 
 def mainLoop(): #main loop
 
     obs, more={}, True
 
-    APIs = {'1' : FRBapi.searchTitle, '2' : fred_API.searchTitle,
-             '3' : scratchAPI.searchTitle} #TODO add way to call python 27 api
-    #TODO change above dictionary so its value are the modules themselves
+    APIs = {'1' : FRBapi, '2' : fred_API,
+             '3' : scratchAPI} #TODO add way to call python 27 api
     #TODO Each module will have get series method and get obs method
 
     api_choice = None
@@ -101,17 +107,22 @@ def mainLoop(): #main loop
         print(" 1) FRB\n 2) FRED\n 3) scratch")
         api_choice = input()
 
-    searchMethod = APIs[api_choice]
+    api = APIs[api_choice]
     feelingLucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
 
     while(more):
-        titles = input("Enter search keys: ")
+        titles = input("Enter search keys: ").split(' ')
         for t in titles:
-            obs.update(searchMethod(t, feelingLucky)) #TODO refactor search methods to return dictionary
-        more = (input("Search Again(Y/N): ").upper() == 'N') #defaults to yes
+            #obs.update(searchMethod(t, feelingLucky)) #TODO refactor search methods to return dictionary
+            searhRes = api.searchTitle(t)
+            printSearchResults(searhRes)
+            selections = input("Enter Selections: ").split(' ')
+            for i in selections:
+                obs.update(api.getObs(searhRes[int(i)][1]))
+        more = (input("Search Again(Y/N): ").upper() == 'Y')
 
-    #if obs!={}: printCSV(obs) #TODO
-    #else: print('no data recorded -> good bye :)')
+    if obs!={}: printCSV(obs) #TODO
+    else: print('no data recorded -> good bye :)')
 
 if __name__=="__main__":
     mainLoop()

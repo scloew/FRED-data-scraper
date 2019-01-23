@@ -36,7 +36,7 @@ def searchTitle(*args): #searches for items matching search key
         return l #returns list of tuples (series title, series id)
 
 
-def getObs(l, lucky=False): #takes list from search and returns dict with observations #TODO implement lucky
+def getObs(l):
 
     sels=input('Enter selection: ')
     sels=sels.split(' ')
@@ -44,7 +44,7 @@ def getObs(l, lucky=False): #takes list from search and returns dict with observ
     sels=[1]
 
     obs={} #dict{'seriesID': {'date':value}}
-        
+
     for i in sels:
         try:
                 res=fred.get_series_latest_release(l[int(i)][1])
