@@ -32,12 +32,10 @@ def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor thi
     return series #list of tuples (seried title, fRED id)
 
 def getObs(series_ID):
-    #TODO make this not broke
-
 
     params = {
          'limit':10000,
          'output_type':1
          }
 
-    return {series_ID, fr.series.observations(series_ID, params=params)}
+    return dict({series_ID : fr.series.observations(series_ID, params=params)})

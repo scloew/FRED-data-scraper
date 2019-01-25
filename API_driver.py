@@ -35,20 +35,26 @@ def writeMeta(l, fname): #collects and writes meta data
             file.write(data['seriess'][0]['seasonal_adjustment']+ '\n'+ 'frequency: ' +
                         data['seriess'][0]['frequency']+' units: '+ data['seriess'][0]['units']+'\n')
             file.write('start: '+ data['seriess'][0]['observation_start']+ ' end:'+
-                       data['seriess'][0]['observation_end']+'\n \n ---------------- \n ---------------- \n')
+                       data['seriess'][0]['observation_end']+
+                       '\n \n ---------------- \n ---------------- \n')
         file.close()
 
-
+00
 def collectDates(obs, op):
 
-        dates=set(obs[list(obs.keys())[0]].keys()) #set of dates
-        for o in obs.keys(): #loop collects set of all dates
-            temp=set(obs[o].keys())
-            dates=op(dates,temp)
+        dates=set()
+        for k in obs.keys():
+            tempDates= set()
+            for item in obs[k]:
+                tempDates.add(item['date']) #TODO should just use list comprehension
+            if dates==set():
+                dates = dates.union(tempDates)
+            else:
+                dates = op(dates, tempDates)
+        #dates=sorted((dates))
 
-        dates=sorted(dates)
         return dates
-
+#TODO refactor this -> really ugly
 
 def printCSV(obs): #prints csv
 
@@ -62,21 +68,21 @@ def printCSV(obs): #prints csv
 
         keys=["dates"]
         for k in obs.keys(): keys.append(k)
-        wr.writerow(keys) #successfully writes row of dates and id's
+        wr.writerow(keys)
 
         dates=collectDates(obs, op)
         if dates==[] and op==operator.and_:
                 print("No compatible dates; recording all dates.")
                 dates=collectDates(obs, operator.or_)
 
-        for d in dates:
+      for d in dates:
             l=[d]
             for k in range(1,len(keys)):
                 if d not in obs[keys[k]].keys():
-                    l.append('.')
+                    l.append(None)
                 else:
                     l.append(obs[keys[k]][d])
-            wr.writerow(l)
+            wr.writerow(l) #TODO need to get this method working above append does not work
 
         if input('Would you like to record meta data?(Y/N): ').upper()=='Y':
             writeMeta(list(obs.keys()), fileName)#defaults to no
@@ -86,7 +92,7 @@ def printSearchResults(searchRes):
 
     index=1
     for item in searchRes:
-        print(item[0])
+        print(str(index)+') '+item[0])
         index+=1
         if index > 50:
             break
@@ -104,11 +110,11 @@ def mainLoop(): #main loop
 
     while(api_choice not in APIs.keys()):
         print("Select API")
-        print(" 1) FRB\n 2) FRED\n 3) scratch")
+        print(" 1) FRB 2) FRED 3) scratch")
         api_choice = input()
 
     api = APIs[api_choice]
-    feelingLucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
+    lucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
 
     while(more):
         titles = input("Enter search keys: ").split(' ')
@@ -118,7 +124,7 @@ def mainLoop(): #main loop
             printSearchResults(searhRes)
             selections = input("Enter Selections: ").split(' ')
             for i in selections:
-                obs.update(api.getObs(searhRes[int(i)][1]))
+                obs.update(api.getObs(searhRes[int(i)][1])) ##TODO update to receive {series: (date : value)}
         more = (input("Search Again(Y/N): ").upper() == 'Y')
 
     if obs!={}: printCSV(obs) #TODO
