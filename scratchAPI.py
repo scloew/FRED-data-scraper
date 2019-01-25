@@ -70,16 +70,6 @@ def searchTitle(): #takes search key and returns data sets from FED PDL
     return vals #returns dict of {'seriesID',getObs()}
     
 
-def collectDates(obs, op):
-
-        dates=set(obs[list(obs.keys())[0]].keys()) #set of dates
-        for o in obs.keys(): #loop collects set of all dates
-            temp=set(obs[o].keys())
-            dates=op(dates,temp)
-
-        dates=sorted(dates)
-        return dates
-
 def lucky(): #essentially works same as google's feeling lucky
              #takes first result from search for each search key
              #TODO Additional refactoring needed here?
@@ -105,20 +95,4 @@ def lucky(): #essentially works same as google's feeling lucky
         obs[i]=getObs(i)
     
     return obs
-
-def fredScrape3(): #main loop
-
-    print('running 1')
-
-    obs, more={}, True
-    if input('Feeling lucky? (Y/N): ').upper()=='Y':
-        obs, more=lucky(), False
-        
-    while(more):
-        obs.update(searchTitle())
-        if input("Search Again(Y/N): ").upper() == 'N': #defaults to yes
-            break
-
-    if obs!={}: printCSV(obs)
-    else: print('no data recorded -> good bye :)')
 

@@ -16,13 +16,6 @@ fr = Fred(api_key='3b7e7d31bcc6d28556c82c290eb3572e',response_type='dict')
 
 def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor this; not single purpose (i.e use helpers)
                                                               #TODO better naming skills
-
-    ##PRINT options
-    ##collect selections
-    ##collect observations
-    ##return observations
-
-    #l.append((item['title'],item['id']))
     params={'limit':50}
     searchRes=fr.series.search(str(searchKey),params=params)
     series = []

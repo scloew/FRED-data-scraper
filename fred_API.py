@@ -15,74 +15,33 @@ import csv
 
 fred=Fred(api_key='3b7e7d31bcc6d28556c82c290eb3572e')
 
-def searchTitle(*args): #searches for items matching search key
+def searchTitle(searchKey , lucky=False): #searches for items matching search key
                         #returns list of responses
         
-        if not args: searchKey=input("Enter search key: ")
-        else: searchKey=args[0]
+        #if not args: searchKey=input("Enter search key: ")
+        #else: searchKey=args[0]
         df=fred.search(searchKey).T
         titles=df.columns.values.tolist()
-        l=['']
-        if not args: print('0) ALL')
+        l=[]
         index=1
         for t in titles:
                 temp=df[t].values.tolist()
-                l.append((temp[12],t))
-                if args: break
-                print(index,')',l[index][0])
+                l.append((temp[12],t)) #TODO review and document what this is
                 index+=1
                 if index==51: break
 
-        return l #returns list of tuples (series title, series id)
+        return l #returns list of tuples (series title, series id)
 
 
-def getObs(l):
-
-    sels=input('Enter selection: ')
-    sels=sels.split(' ')
-    if '0' in sels: sels=range(1,len(l))
-    sels=[1]
+def getObs(series_ID):
 
     obs={} #dict{'seriesID': {'date':value}}
 
-    for i in sels:
-        try:
-                res=fred.get_series_latest_release(l[int(i)][1])
-                obs[l[int(i)][1]]=dict(zip(res.keys(),res.values.tolist()))
-        except:
-                print('Invalid data selection: ', i)
+    try:
+        res=fred.get_series_latest_release(series_ID)
+        obs[series_ID]=dict(zip(res.keys(),res.values.tolist())) #TODO does not have date
+        print(obs)
+    except:
+        print('Invalid data selection: ', series_ID)
 
     return obs #return dict{series ID, {date, value}}
-
-
-
-def collectDates(obs, op):
-
-        dates=set(obs[list(obs.keys())[0]].keys()) #set of dates
-        for o in obs.keys(): #loop collects set of all dates
-            temp=set(obs[o].keys())
-            dates=op(dates,temp)
-
-        dates=sorted(dates)
-        return dates
-
-def fredapi(): #main loop
-
-
-    print('running 2')
-
-    obs, more={}, True
-    if input('Feeling lucky? (Y/N): ').upper()=='Y':
-        obs, more=lucky(), False
-        
-    while(more):
-        try:
-                obs.update(getObs(searchTitle()))
-        except:
-                print('search error')
-        if input("Search Again(Y/N): ").upper() == 'N':
-            break
-
-    if obs!={}: printCSV(obs)
-    else: print('No data recorded -> good bye :)')
-	

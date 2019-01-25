@@ -41,6 +41,8 @@ def writeMeta(l, fname): #collects and writes meta data
 
 00
 def collectDates(obs, op):
+#TODO fred_API dictionary returned from get obs does not have "date" key but has timestamp
+#TODO may need to switch to using timestamp
 
         dates=set()
         for k in obs.keys():
@@ -51,7 +53,6 @@ def collectDates(obs, op):
                 dates = dates.union(tempDates)
             else:
                 dates = op(dates, tempDates)
-        #dates=sorted((dates))
 
         return dates
 #TODO refactor this -> really ugly
@@ -75,14 +76,13 @@ def printCSV(obs): #prints csv
                 print("No compatible dates; recording all dates.")
                 dates=collectDates(obs, operator.or_)
 
-      for d in dates:
-            l=[d]
-            for k in range(1,len(keys)):
-                if d not in obs[keys[k]].keys():
-                    l.append(None)
-                else:
-                    l.append(obs[keys[k]][d])
-            wr.writerow(l) #TODO need to get this method working above append does not work
+        for d in dates:
+            l = [d]
+            for series in obs.keys():
+                for ob in obs[series]:
+                    if ob['date'] in dates:
+                        l.append(ob['value'])
+            wr.writerow(l)
 
         if input('Would you like to record meta data?(Y/N): ').upper()=='Y':
             writeMeta(list(obs.keys()), fileName)#defaults to no
@@ -122,7 +122,7 @@ def mainLoop(): #main loop
             #obs.update(searchMethod(t, feelingLucky)) #TODO refactor search methods to return dictionary
             searhRes = api.searchTitle(t)
             printSearchResults(searhRes)
-            selections = input("Enter Selections: ").split(' ')
+            selections = input("Enter Selections: ").split(' ') #TODO doesn't handle two word keys (like "european union)"
             for i in selections:
                 obs.update(api.getObs(searhRes[int(i)][1])) ##TODO update to receive {series: (date : value)}
         more = (input("Search Again(Y/N): ").upper() == 'Y')
