@@ -39,54 +39,47 @@ def writeMeta(l, fname): #collects and writes meta data
                        '\n \n ---------------- \n ---------------- \n')
         file.close()
 
-00
+
 def collectDates(obs, op):
-#TODO fred_API dictionary returned from get obs does not have "date" key but has timestamp
-#TODO may need to switch to using timestamp
 
-        dates=set()
-        for k in obs.keys():
-            tempDates= set()
-            for item in obs[k]:
-                tempDates.add(item['date']) #TODO should just use list comprehension
-            if dates==set():
-                dates = dates.union(tempDates)
-            else:
-                dates = op(dates, tempDates)
+    dates = set((obs[(list(obs.keys()))[0]]).keys())
+    for series in obs.keys():
+        dates = op(dates, set(obs[series].keys()))
 
-        return dates
-#TODO refactor this -> really ugly
+    return dates
 
-def printCSV(obs): #prints csv
+
+def recordData(obs): #prints csv
 
     print('Would you like to record for all dates (A) or all compatible dates (C)?')
     if input().upper()=='C': op=operator.and_
     else: op=operator.or_
 
+    dates=collectDates(obs, op)
+
+    if dates==set() and op==operator.and_:
+        print("No compatible dates; recording all dates.")
+        dates=collectDates(obs, operator.or_)
+
     fileName=input("Enter file name to write to: ")
     with open(fileName, "w") as file:
         wr=csv.writer(file)
 
-        keys=["dates"]
-        for k in obs.keys(): keys.append(k)
-        wr.writerow(keys)
+        header=["dates"]
+        for k in obs.keys(): header.append(k)
+        wr.writerow(header)
 
-        dates=collectDates(obs, op)
-        if dates==[] and op==operator.and_:
-                print("No compatible dates; recording all dates.")
-                dates=collectDates(obs, operator.or_)
-
-        for d in dates:
+        for d in sorted(dates):
             l = [d]
-            for series in obs.keys():
-                for ob in obs[series]:
-                    if ob['date'] in dates:
-                        l.append(ob['value'])
+            for series, observations in obs.items():
+                if d in observations.keys():
+                    l.append(observations[d])
+                else:
+                    l.append(None)
             wr.writerow(l)
 
-        if input('Would you like to record meta data?(Y/N): ').upper()=='Y':
-            writeMeta(list(obs.keys()), fileName)#defaults to no
-
+        if input("Record meta data? (Y/N)").upper()=='Y':
+            writeMeta(obs, fileName)
 
 def printSearchResults(searchRes):
 
@@ -127,7 +120,7 @@ def mainLoop(): #main loop
                 obs.update(api.getObs(searhRes[int(i)][1])) ##TODO update to receive {series: (date : value)}
         more = (input("Search Again(Y/N): ").upper() == 'Y')
 
-    if obs!={}: printCSV(obs) #TODO
+    if obs!={}: recordData(obs) #TODO
     else: print('no data recorded -> good bye :)')
 
 if __name__=="__main__":

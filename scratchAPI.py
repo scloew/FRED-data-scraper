@@ -6,9 +6,11 @@ import csv
 import datetime
 import operator
 
+key="&api_key=3b7e7d31bcc6d28556c82c290eb3572e"
+
+
 def getObs(seriesID): #records the observations for a given seriesID
 
-    key="&api_key=3b7e7d31bcc6d28556c82c290eb3572e"
     obsUrl="https://api.stlouisfed.org/fred/series/observations?series_id="+seriesID+key
     obsHTML=urlopen(obsUrl)
     bsObj=BeautifulSoup(obsHTML,"html.parser")

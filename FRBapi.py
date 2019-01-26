@@ -6,12 +6,7 @@
 #https://github.com/avelkoski/FRB
 
 from fred import Fred
-from urllib.request import urlopen
-import operator
-import re
-import csv
-import datetime
-import json
+
 fr = Fred(api_key='3b7e7d31bcc6d28556c82c290eb3572e',response_type='dict')
 
 def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor this; not single purpose (i.e use helpers)
@@ -26,9 +21,14 @@ def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor thi
 
 def getObs(series_ID):
 
+    obs = {}
+
     params = {
          'limit':10000,
          'output_type':1
          }
+    tempD = dict({series_ID : fr.series.observations(series_ID, params=params)})
+    for d in tempD[series_ID]:
+        obs[d['date']]=d['value']
 
-    return dict({series_ID : fr.series.observations(series_ID, params=params)})
+    return {series_ID : obs} #dict({series_ID : fr.series.observations(series_ID, params=params)})
