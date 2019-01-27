@@ -16,7 +16,6 @@ import fred_API
 #import python27api
 import scratchAPI
 
-
 def writeMeta(l, fname): #collects and writes meta data
 
     mname=fname[:fname.rfind('.')]+'Meta.txt'
@@ -110,17 +109,20 @@ def mainLoop(): #main loop
     lucky = (input('Feeling lucky? (Y/N): ').upper()=='Y')
 
     while(more):
-        titles = input("Enter search keys: ").split(' ')
+        titles = input("Enter search keys comma delimited: ").split(',')
         for t in titles:
-            #obs.update(searchMethod(t, feelingLucky)) #TODO refactor search methods to return dictionary
-            searhRes = api.searchTitle(t)
-            printSearchResults(searhRes)
-            selections = input("Enter Selections: ").split(' ') #TODO doesn't handle two word keys (like "european union)"
+            searhRes = api.searchTitle(t, lucky)
+            if not lucky:
+                printSearchResults(searhRes)
+                selections = input("Enter Selections: ").split(' ')
+            else:
+                selections = [i for i in range(len(searhRes))]
+
             for i in selections:
-                obs.update(api.getObs(searhRes[int(i)][1])) ##TODO update to receive {series: (date : value)}
+                obs.update(api.getObs(searhRes[int(i)][1]))
         more = (input("Search Again(Y/N): ").upper() == 'Y')
 
-    if obs!={}: recordData(obs) #TODO
+    if obs!={}: recordData(obs)
     else: print('no data recorded -> good bye :)')
 
 if __name__=="__main__":

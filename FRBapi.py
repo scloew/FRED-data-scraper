@@ -16,6 +16,7 @@ def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor thi
     series = []
     for result in searchRes:
         series.append((result['title'], result['id']))
+        if lucky: break
 
     return series #list of tuples (seried title, fRED id)
 
@@ -31,4 +32,5 @@ def getObs(series_ID):
     for d in tempD[series_ID]:
         obs[d['date']]=d['value']
 
-    return {series_ID : obs} #dict({series_ID : fr.series.observations(series_ID, params=params)})
+    return {series_ID : obs}
+    #return dict{series ID, {date, value}}

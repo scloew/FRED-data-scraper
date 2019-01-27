@@ -10,8 +10,6 @@ fred=Fred(api_key='3b7e7d31bcc6d28556c82c290eb3572e')
 def searchTitle(searchKey , lucky=False): #searches for items matching search key
                         #returns list of responses
 
-        #if not args: searchKey=input("Enter search key: ")
-        #else: searchKey=args[0]
         df=fred.search(searchKey).T
         titles=df.columns.values.tolist()
         l=[]
@@ -21,13 +19,13 @@ def searchTitle(searchKey , lucky=False): #searches for items matching search ke
                 l.append((temp[12],t)) #TODO review and document what this is
                 index+=1
                 if index==51: break
+                if lucky: break
 
         return l #returns list of tuples (series title, series id)
 
 
 def getObs(series_ID):
-    #Need to return dict {series{}}
-    obs={} #dict{'seriesID': {'date':value}}
+    obs={}
 
     try:
         res=fred.get_series_latest_release(series_ID)
@@ -35,4 +33,5 @@ def getObs(series_ID):
     except:
         print('Invalid data selection: ', series_ID)
 
-    return obs #return dict{series ID, {date, value}}
+    return obs
+    #return dict{series ID, {date, value}}
