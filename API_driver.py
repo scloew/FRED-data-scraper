@@ -35,7 +35,7 @@ def writeMeta(l, fname): #collects and writes meta data
                         data['seriess'][0]['frequency']+' units: '+ data['seriess'][0]['units']+'\n')
             file.write('start: '+ data['seriess'][0]['observation_start']+ ' end:'+
                        data['seriess'][0]['observation_end']+
-                       '\n \n ---------------- \n ---------------- \n')
+                       '\n \n ---------------- \n ---------------- \n') ##TODO use string interp; and better names
         file.close()
 
 
@@ -44,7 +44,6 @@ def collectDates(obs, op):
     dates = set((obs[(list(obs.keys()))[0]]).keys())
     for series in obs.keys():
         dates = op(dates, set(obs[series].keys()))
-
     return dates
 
 
@@ -54,18 +53,19 @@ def recordData(obs): #prints csv
     if input().upper()=='C': op=operator.and_
     else: op=operator.or_
 
-    dates=collectDates(obs, op)
+    dates = collectDates(obs, op)
 
-    if dates==set() and op==operator.and_:
+    if not dates and op == operator.and_:
         print("No compatible dates; recording all dates.")
-        dates=collectDates(obs, operator.or_)
+        dates = collectDates(obs, operator.or_)
 
     fileName=input("Enter file name to write to: ")
     with open(fileName, "w") as file:
-        wr=csv.writer(file)
+        wr = csv.writer(file)
 
         header=["dates"]
-        for k in obs.keys(): header.append(k)
+        for k in obs.keys():
+            header.append(k)
         wr.writerow(header)
 
         for d in sorted(dates):
@@ -77,7 +77,7 @@ def recordData(obs): #prints csv
                     l.append(None)
             wr.writerow(l)
 
-        if input("Record meta data? (Y/N)").upper()=='Y':
+        if input("Record meta data? (Y/N)").upper() == 'Y':
             writeMeta(obs, fileName)
 
 def printSearchResults(searchRes):
@@ -119,7 +119,7 @@ def mainLoop(): #main loop
                 selections = [i for i in range(len(searhRes))]
 
             for i in selections:
-                obs.update(api.getObs(searhRes[int(i)][1]))
+                obs.update(api.getObs(searhRes[int(i)][1])) #TODO need check for in bounds
         more = (input("Search Again(Y/N): ").upper() == 'Y')
 
     if obs!={}: recordData(obs)
