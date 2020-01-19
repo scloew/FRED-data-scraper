@@ -7,13 +7,15 @@
 
 from fred import Fred
 
-fr = Fred(api_key='3b7e7d31bcc6d28556c82c290eb3572e',response_type='dict')
+fr = Fred(api_key='3b7e7d31bcc6d28556c82c290eb3572e', response_type='dict')
 
 def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor this; not single purpose (i.e use helpers)
                                                               #TODO better naming skills
     params={'limit':50}
-    searchRes=fr.series.search(str(searchKey),params=params)
+    print(searchKey)
+    searchRes=fr.series.search(searchKey, params=params)
     series = []
+    print('check 1')
     for result in searchRes:
         series.append((result['title'], result['id']))
         if lucky: break
