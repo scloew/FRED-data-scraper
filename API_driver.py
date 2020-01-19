@@ -17,92 +17,91 @@ import fred_API
 import scratchAPI
 
 
-def writeMeta(l, fname):  # collects and writes meta data
+def record_meta(l, file_name):  # collects and writes meta data
 
-    meta_name = fname[:fname.rfind('.')] + 'Meta.txt'
+    meta_name = file_name[:file_name.rfind('.')] + 'Meta.txt'
     print('writing to: ', meta_name)
 
-    with open(meta_name, 'w') as file:
-        file.write('Accessed ' + str(datetime.date.today()) + '\n' + '\n' + '\n')
-        for ID in l :
+    with open(meta_name, 'w') as meta_file:
+        meta_file.write('Accessed ' + str(datetime.date.today()) + '\n' + '\n' + '\n')
+        for ID in l:
             key = "&api_key=3b7e7d31bcc6d28556c82c290eb3572e&file_type=json"
             url = 'https://api.stlouisfed.org/fred/series?series_id=' + ID + key
             response = urlopen(url)
             content = response.read()
             data = json.loads(content.decode('utf8'))
-            file.write(ID + '\n')
-            file.write(data['seriess'][0]['title'] + '\n')
-            file.write(data['seriess'][0]['seasonal_adjustment'] + '\n' + 'frequency: ' +
+            meta_file.write(ID + '\n')
+            meta_file.write(data['seriess'][0]['title'] + '\n')
+            meta_file.write(data['seriess'][0]['seasonal_adjustment'] + '\n' + 'frequency: ' +
                        data['seriess'][0]['frequency'] + ' units: ' + data['seriess'][0]['units'] + '\n')
-            file.write('start: ' + data['seriess'][0]['observation_start'] + ' end:' +
+            meta_file.write('start: ' + data['seriess'][0]['observation_start'] + ' end: ' +
                        data['seriess'][0]['observation_end'] +
                        '\n \n ---------------- \n ---------------- \n')  ##TODO use string interp; and better names
-        file.close()
+        meta_file.close()
 
 
-def collectDates(obs, op):
+def collect_dates(obs, op):
     dates = set((obs[(list(obs.keys()))[0]]).keys())
     for series in obs.keys():
         dates = op(dates, set(obs[series].keys()))
     return dates
 
 
-def recordData(obs):  # prints csv
+def record_data(obs):  # prints csv
 
     print('Would you like to record for all dates (A) or all compatible dates (C)?')
-    if input().upper() == 'C' :
+    if input().upper() == 'C':
         op = operator.and_
-    else :
+    else:
         op = operator.or_
 
-    dates = collectDates(obs, op)
+    dates = collect_dates(obs, op)
 
     if not dates and op == operator.and_:
         print("No compatible dates; recording all dates.")
-        dates = collectDates(obs, operator.or_)
+        dates = collect_dates(obs, operator.or_)
 
-    fileName = input("Enter file name to write to: ")
-    with open(fileName, "w") as file:
+    file_name = input("Enter file name to write to: ")
+    with open(file_name, "w") as file:
         wr = csv.writer(file)
 
-        header = ["dates"]
-        for k in obs.keys():
-            header.append(k)
+        header = ["dates"] + [k for k in obs.keys()]
+
         wr.writerow(header)
 
         for d in sorted(dates):
-            l = [d]
+            data_row = [d]
             for series, observations in obs.items():
-                if d in observations.keys() :
-                    l.append(observations[d])
-                else :
-                    l.append(None)
-            wr.writerow(l)
+                if d in observations.keys():
+                    data_row.append(observations[d])
+                else:
+                    data_row.append(None)
+            wr.writerow(data_row)
 
         if input("Record meta data? (Y/N)").upper() == 'Y':
-            writeMeta(obs, fileName)
+            record_meta(obs, file_name)
 
 
-def printSearchResults(searchRes):
+def print_search_results(search_res):
     index = 1
-    for item in searchRes:
+    for item in search_res:
         print(str(index) + ') ' + item[0])
         index += 1
         if index > 50:
             break
 
 
-def mainLoop() :  # main loop
+def main_loop():  # main loop
 
     obs, more = {}, True
 
-    APIs = {'1' : FRBapi, '2' : fred_API,
-            '3' : scratchAPI}  # TODO add way to call python 27 api
+    APIs = {'1': FRBapi, '2': fred_API,
+            '3': scratchAPI}  # TODO add way to call python 27 api
     # TODO Each module will have get series method and get obs method
 
     api_choice = None
 
-    while (api_choice not in APIs.keys()):
+    while api_choice not in APIs.keys():
         print("Select API")
         print(" 1) FRB 2) FRED 3) scratch")
         api_choice = input()
@@ -110,25 +109,25 @@ def mainLoop() :  # main loop
     api = APIs[api_choice]
     lucky = (input('Feeling lucky? (Y/N): ').upper() == 'Y')
 
-    while (more) :
+    while more:
         titles = input("Enter search keys comma delimited: ").split(',')
-        for t in titles :
-            searhRes = api.searchTitle(t, lucky)
-            if not lucky :
-                printSearchResults(searhRes)
+        for t in titles:
+            search_res = api.searchTitle(t, lucky)
+            if not lucky:
+                print_search_results(search_res)
                 selections = input("Enter Selections: ").split(' ')
-            else :
-                selections = [i for i in range(len(searhRes))]
+            else:
+                selections = [i for i in range(len(search_res))]
 
-            for i in selections :
-                obs.update(api.getObs(searhRes[int(i)][1]))  # TODO need check for in bounds
+            for i in selections:
+                obs.update(api.getObs(search_res[int(i)][1]))  # TODO need check for in bounds
         more = (input("Search Again(Y/N): ").upper() == 'Y')
 
     if obs:
-        recordData(obs)
+        record_data(obs)
     else:
         print('no data recorded -> good bye :)')
 
 
 if __name__ == "__main__":
-    mainLoop()
+    main_loop()
