@@ -13,7 +13,7 @@ def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor thi
                                                               #TODO better naming skills
     params={'limit':50}
     print(searchKey)
-    searchRes=fr.series.search(searchKey, params=params)
+    searchRes=fr.series.search(searchKey, params=params) #TODO search breaking
     series = []
     print('check 1')
     for result in searchRes:
@@ -22,7 +22,7 @@ def searchTitle(searchKey, lucky=False): #finds series titles #TODO refactor thi
 
     return series #list of tuples (seried title, fRED id)
 
-def getObs(series_ID):
+def get_obs(series_ID):
 
     obs = {}
 

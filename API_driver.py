@@ -83,6 +83,7 @@ def record_data(obs):  # prints csv
 
 
 def print_search_results(search_res):
+    print(search_res)
     index = 1
     for item in search_res:
         print(str(index) + ') ' + item[0])
@@ -112,7 +113,7 @@ def main_loop():  # main loop
     while more:
         titles = input("Enter search keys comma delimited: ").split(',')
         for t in titles:
-            search_res = api.searchTitle(t, lucky)
+            search_res = api.search_title(t, lucky)
             if not lucky:
                 print_search_results(search_res)
                 selections = input("Enter Selections: ").split(' ')
@@ -120,7 +121,7 @@ def main_loop():  # main loop
                 selections = [i for i in range(len(search_res))]
 
             for i in selections:
-                obs.update(api.getObs(search_res[int(i)][1]))  # TODO need check for in bounds
+                obs.update(api.get_obs(search_res[int(i)][1]))  # TODO need check for in bounds
         more = (input("Search Again(Y/N): ").upper() == 'Y')
 
     if obs:
