@@ -26,17 +26,17 @@ def record_meta(l, file_name):  # collects and writes meta data
         meta_file.write('Accessed ' + str(datetime.date.today()) + '\n' + '\n' + '\n')
         for ID in l:
             key = "&api_key=3b7e7d31bcc6d28556c82c290eb3572e&file_type=json"
-            url = 'https://api.stlouisfed.org/fred/series?series_id=' + ID + key
+            url = f'https://api.stlouisfed.org/fred/series?series_id={ID}{key}'
             response = urlopen(url)
             content = response.read()
             data = json.loads(content.decode('utf8'))
             meta_file.write(ID + '\n')
-            meta_file.write(data['seriess'][0]['title'] + '\n')
-            meta_file.write(data['seriess'][0]['seasonal_adjustment'] + '\n' + 'frequency: ' +
-                       data['seriess'][0]['frequency'] + ' units: ' + data['seriess'][0]['units'] + '\n')
-            meta_file.write('start: ' + data['seriess'][0]['observation_start'] + ' end: ' +
-                       data['seriess'][0]['observation_end'] +
-                       '\n \n ---------------- \n ---------------- \n')  ##TODO use string interp; and better names
+            meta_file.write(f'{data["seriess"][0]["title"]}\n')
+            meta_file.write(f'{data["seriess"][0]["seasonal_adjustment"]}\nfrequency: ' +
+                            f'{data["seriess"][0]["frequency"]}\nunits: {data["seriess"][0]["units"]}\n')
+            meta_file.write(f'start: {data["seriess"][0]["observation_start"]} end: ' +
+                            data["seriess"][0]["observation_end"] +
+                            f'\n \n{"-"*16} \n{"-"*16} \n')
         meta_file.close()
 
 
@@ -92,13 +92,15 @@ def print_search_results(search_res):
             break
 
 
-def main_loop():  # main loop
-
+def main_loop():
+    """
+    Loop to drive selection of api, run query, and write data
+    :return:
+    """
     obs, more = {}, True
 
     APIs = {'1': FRBapi, '2': fred_API,
             '3': scratchAPI}  # TODO add way to call python 27 api
-    # TODO Each module will have get series method and get obs method
 
     api_choice = None
 
@@ -121,7 +123,10 @@ def main_loop():  # main loop
                 selections = [i for i in range(len(search_res))]
 
             for i in selections:
-                obs.update(api.get_obs(search_res[int(i)][1]))  # TODO need check for in bounds
+                try:
+                    obs.update(api.get_obs(search_res[int(i)][1]))
+                except IndexError:
+                    print(f'invalid selection {i}')
         more = (input("Search Again(Y/N): ").upper() == 'Y')
 
     if obs:
